@@ -332,11 +332,11 @@ extension RepoAnalyser {
             autoreleasepool {
                 if line.hasPrefix("diff --git ") || line.hasPrefix("diff --cc ") {
                     commitSwitch(status: .header)
-                    continue
+                    return
                 }
                 if line.hasPrefix("@@") {
                     commitSwitch(status: .body)
-                    continue
+                    return
                 }
                 commitBuffer(str: line)
             }
