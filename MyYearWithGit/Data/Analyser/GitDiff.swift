@@ -43,12 +43,28 @@ extension RepoAnalyser {
             args: [
                 "diff",
                 "\(commitHash)^!",
-            ], timeout: 0
+            ], timeout: 30
         ) { _ in
         }
+        
+        // Check if git diff command failed
+        guard command.0 == 0 else {
+            print("git diff failed for commit \(commitHash), exit code: \(command.0)", to: &standardError)
+            if !command.2.isEmpty {
+                print("stderr: \(command.2)", to: &standardError)
+            }
+            return []
+        }
+        
         let diff = command
             .1
             .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Handle empty diff (e.g., merge commit with no changes)
+        guard !diff.isEmpty else {
+            return []
+        }
+        
         var result = [GitCommitResult.GitFileDiff]()
 
         var currentFileDiff: GitCommitResult.GitFileDiff?
@@ -92,10 +108,14 @@ extension RepoAnalyser {
                     while path.hasPrefix(" ") {
                         path.removeFirst()
                     }
-                    while !path.hasPrefix("/"), path.count > 0 {
+                    // Safety check: prevent infinite loop
+                    let originalPathLength = path.count
+                    var removedChars = 0
+                    while !path.hasPrefix("/"), path.count > 0, removedChars < originalPathLength {
                         path.removeFirst()
+                        removedChars += 1
                     }
-                    guard path.count > 0 else {
+                    guard path.count > 0, path.hasPrefix("/") else {
                         print("unknown file <\(line)>", to: &standardError)
                         return
                     }
@@ -114,10 +134,14 @@ extension RepoAnalyser {
                     while path.hasPrefix(" ") {
                         path.removeFirst()
                     }
-                    while !path.hasPrefix("/"), path.count > 0 {
+                    // Safety check: prevent infinite loop
+                    let originalPathLength = path.count
+                    var removedChars = 0
+                    while !path.hasPrefix("/"), path.count > 0, removedChars < originalPathLength {
                         path.removeFirst()
+                        removedChars += 1
                     }
-                    guard path.count > 0 else {
+                    guard path.count > 0, path.hasPrefix("/") else {
                         print("unknown file <\(line)>", to: &standardError)
                         return
                     }
@@ -144,10 +168,14 @@ extension RepoAnalyser {
                     while path.hasPrefix(" ") {
                         path.removeFirst()
                     }
-                    while !path.hasPrefix("/"), path.count > 0 {
+                    // Safety check: prevent infinite loop
+                    let originalPathLength = path.count
+                    var removedChars = 0
+                    while !path.hasPrefix("/"), path.count > 0, removedChars < originalPathLength {
                         path.removeFirst()
+                        removedChars += 1
                     }
-                    guard path.count > 0 else {
+                    guard path.count > 0, path.hasPrefix("/") else {
                         print("unknown file <\(line)>", to: &standardError)
                         return
                     }
@@ -162,14 +190,18 @@ extension RepoAnalyser {
             case "deleted":
                 mode = .delete
                 for line in currentBuffer where line.hasPrefix("--- ") {
-                    var path = String(line.dropFirst("+++ ".count))
+                    var path = String(line.dropFirst("--- ".count))
                     while path.hasPrefix(" ") {
                         path.removeFirst()
                     }
-                    while !path.hasPrefix("/"), path.count > 0 {
+                    // Safety check: prevent infinite loop
+                    let originalPathLength = path.count
+                    var removedChars = 0
+                    while !path.hasPrefix("/"), path.count > 0, removedChars < originalPathLength {
                         path.removeFirst()
+                        removedChars += 1
                     }
-                    guard path.count > 0 else {
+                    guard path.count > 0, path.hasPrefix("/") else {
                         print("unknown file <\(line)>", to: &standardError)
                         return
                     }
@@ -300,11 +332,11 @@ extension RepoAnalyser {
             autoreleasepool {
                 if line.hasPrefix("diff --git ") || line.hasPrefix("diff --cc ") {
                     commitSwitch(status: .header)
-                    return
+                    continue
                 }
                 if line.hasPrefix("@@") {
                     commitSwitch(status: .body)
-                    return
+                    continue
                 }
                 commitBuffer(str: line)
             }
