@@ -683,7 +683,7 @@
 			repositoryURL = "https://github.com/Lakr233/ColorfulX";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.5.2;
+				minimumVersion = 6.0.2;
 			};
 		};
 		50802D652D1133F600694021 /* XCRemoteSwiftPackageReference "AuxiliaryExecute" */ = {

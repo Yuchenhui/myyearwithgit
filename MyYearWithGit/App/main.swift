@@ -7,7 +7,7 @@
 
 import Foundation
 
-let requiredYear = 2024
+let requiredYear = 2025
 
 setenv("GIT_TERMINAL_PROMPT", "0", 1)
 setenv("GIT_LFS_SKIP_SMUDGE", "1", 1)
