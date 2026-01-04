@@ -1,0 +1,20 @@
+[project]
+name = "myyearwithgit"
+version = "0.1.0"
+description = "Git 年度提交统计 - 命令行版本"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "rich>=13.0.0",
+    "questionary>=2.0.0",
+]
+
+[project.scripts]
+mywg = "src.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

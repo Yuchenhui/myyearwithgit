@@ -118,3 +118,5 @@ yarn-debug.log*
 yarn-error.log*
 
 /Git/GitBuild
+python-cli/result/*
+python-cli/src/__pycache__
